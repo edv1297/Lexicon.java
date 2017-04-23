@@ -74,6 +74,8 @@ class LexiconNode implements Comparable<LexiconNode> {
 	    }
 	}
     }
+
+    public boo
     
     /**
      * TODO: create an Iterator that iterates over children in alphabetical order
