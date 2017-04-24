@@ -195,9 +195,12 @@ public class LexiconTrie implements Lexicon {
 
 	Iterator<LexiconNode> iter = current.iterator();
 	while(iter.hasNext()){
-	    
+	    System.out.println("iter does have next");
+
 	    LexiconNode nextNode = iter.next().getChild(pattern.charAt(0));
+	    
 	    if(nextNode!=null){
+		System.out.println("nextNode is not null");
 		matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
 	    }
 	}
