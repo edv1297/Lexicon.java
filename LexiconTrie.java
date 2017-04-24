@@ -1,5 +1,16 @@
-// Dysron Marshall and Eddy Varela
-// CS 136 10am
+/* Dysron Marshall and Eddy Varela
+ *CS 136 10am
+ * Thought Question
+ *
+ * If we used an orderedVector instead of a LexiconTrie, we would lose all of the relationships
+ * between a parent node and its children. Since a LexiconTree is a recursive structure, it
+ * becomes very easy to go down the tree by asking for the children of the current node whereas
+ * an orderedVector would not have a feature like that. The LexiconTris is more efficient because
+ * since each node has its own vector of Nodes then only the letters that follow the parent node
+ * will exist in its underlying vector. This makes building words efficient because in order to
+ * build words you need to find the letters that build the word and an orderedVector would not be able
+ * to provide that access to the child nodes.
+ */
 import structure5.*;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -50,12 +61,14 @@ public class LexiconTrie implements Lexicon {
     //pre: valid filename
     //post: scan each line and add the word contained
     public int addWordsFromFile(String filename) {
+	int wordsAdded = 0;
 	FileStream stream = new FileStream(filename);
         Scanner scan = new Scanner(stream);
         while(scan.hasNextLine()){
             addWord(scan.nextLine());
+	    wordsAdded++;
 	}
-	return 0;
+	return wordsAdded;
     }
 
     // post: removes word if present and returns true or false it it was/wasn't found
@@ -180,11 +193,13 @@ public class LexiconTrie implements Lexicon {
     private void matchRegexHelper(String pattern, LexiconNode current,
 				  String word, Set<String> set){
 
+	if(current == null) return;
 	if(pattern.isEmpty()){
-	    return;
+	    if(current.isWord){
+		set.add(word);
+	    }
+	return;
 	}
-
-	if(current.isWord) set.add(word);
 
 	Iterator<LexiconNode> iter = current.iterator();
 	while(iter.hasNext()){
@@ -217,40 +232,4 @@ public class LexiconTrie implements Lexicon {
 			     word+pattern.charAt(0), set);
 	}
     }
-    
-
-    public static void main(String args[]){
-
-	LexiconTrie n = new LexiconTrie();
-	
-	//	for(int j= 0; j<args.length; ++j){
-	//  n.addWord(args[j]);
-	//} 
-
-	Iterator i1 = root.iterator();
-	int count = 0; 
-	while(i1.hasNext()){
-	    LexiconNode l = (LexiconNode)i1.next();
-	    System.out.println(count + ": " + l.letter());
-	    count++;
-	    
-	}
-
-	System.out.println("Number of words: " + n.numWords());
-
-	Iterator<String> lexicon = n.iterator();
-
-	while(lexicon.hasNext()){
-	    String word = lexicon.next();
-	    System.out.println(word + " length is: " + word.length());
-	}
- 
-	Iterator<String> iter = n.matchRegex("*a*").iterator();
-	
-	while(iter.hasNext()){
-	    System.out.println(iter.next());
-	}
-	
-    }
-    
 }
