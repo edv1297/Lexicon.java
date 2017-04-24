@@ -3,38 +3,47 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 public class LexiconTrie implements Lexicon {
-    
+
     protected int count = 0;
     static LexiconNode root = new LexiconNode(' ',false);
-    
+
+    //post: add word to lexicon
     public boolean addWord(String word) {
 	//pre: give a word to be added into the Lexicon
 	//post: return true if the word is new, or false if existing
 	String lowerCaseWord = word.toLowerCase();
 	boolean result = false;
 	LexiconNode node = root;
-	
+
 	for(int i = 0; i<lowerCaseWord.length();++i){
 	    //gives us access to the child node
 	    char letter = lowerCaseWord.charAt(i);
-	    if(node.getChild(letter) == null){  
+	    if(node.getChild(letter) == null){
 		if(i < lowerCaseWord.length()-1){
 		    node.addChild(new LexiconNode(letter,false));
 		}
 		else{
 		    node.addChild(new LexiconNode(letter,true));
+		    count++;
 		}
 		node = node.getChild(letter);
+		result = true;
+	    }
+	    // if the word is added within the branch of another word
+	    // then mark the last node as a word and update count and result
+	    else if(i == lowerCaseWord.length()-1 &&
+		    !node.getChild(letter).isWord){
+		node.getChild(letter).isWord = true;
+		count++;
 		result = true;
 	    }
 	    else{
 		node = node.getChild(letter);
 	    }
 	}
-	if(result) count++;
 	return result;
     }
-    
+
     //pre: valid filename
     //post: scan each line and add the word contained
     public int addWordsFromFile(String filename) {
@@ -44,7 +53,7 @@ public class LexiconTrie implements Lexicon {
 		}
 	return 0;
     }
-    
+
     // post: removes word if present and returns true or false it it was/wasn't found
     public boolean removeWord(String word) {
 	return removeWordHelper(word.toLowerCase(), root);
@@ -63,14 +72,14 @@ public class LexiconTrie implements Lexicon {
 	else{
 	    if(removeWordHelper(word.substring(1), nextNode)){
 		// only delete a node if its only child is a dead end now
-		if(nextNode.children.size()==1){
-		    current.getChildren().remove();
+		if(nextNode.getChildren().isEmpty() && !nextNode.isWord){
+		    current.removeChild(nextNode.letter());
 		}
 	    }
 	}
 	return true;
     }
-    
+
     //post: return number of words in LexiconTrie
     public int numWords() { return count; }
 
@@ -79,13 +88,13 @@ public class LexiconTrie implements Lexicon {
     public boolean containsWord(String word) {
 	return containsWordHelper(word.toLowerCase(), root);
     }
-    
+
     private boolean containsWordHelper(String word, LexiconNode current){
 	if(word.isEmpty()) return current.isWord;
-	
+
 	char nextChar = word.charAt(0);
 	if(current.getChild(nextChar)==null) return false;
-	
+
 	else{
 	    return containsWordHelper(word.substring(1),
 				      current.getChild(nextChar));
@@ -108,63 +117,129 @@ public class LexiconTrie implements Lexicon {
 	}
 	return prefixFound;
     }
-    
+
+    //post: return an iterator of all the words in order
     public Iterator<String> iterator() {
-       
-	return IteratorHelper(root, count, "", new Vector<String>()).iterator();
+
+	Vector<String> words = new Vector<String>();
+	IteratorHelper(root, "", words);
+	return words.iterator();
     }
 
-    private Vector<String> IteratorHelper(LexiconNode current, int numLeft,
-					  String word, Vector<String> words){
-	if(numLeft==0) return new Vector();
-	else if(current.getChildren().isEmpty()){
-	    numLeft = numLeft-1;
-	    words.add(word+current.letter());
-	    return words;
+    private void IteratorHelper(LexiconNode current, String word, Vector<String> words){
+	if(current.isWord){
+	    words.add(word.substring(1)+current.letter());
+
 	}
-	
-	for(int i = 0; i< current.getChildren().size(); i++){
-	    words.addAll(IteratorHelper((LexiconNode)current.getChildren().get(i),
-					numLeft, word, words));
+	Iterator iter = current.iterator();
+	while(iter.hasNext()){
+	    LexiconNode next = (LexiconNode)iter.next();
+	    IteratorHelper(next,word+current.letter(), words);
 	}
-	return words;
     }
-    
-    public Set<String> suggestCorrections(String target, int maxDistance) {
-	return null;
+
+    public Set<String> suggestCorrections(String target, int maxDistance){
+	Set<String> corrections = new SetVector<String>();
+	suggestCorrectionsHelper(target, maxDistance, root, "", corrections);
+	return corrections;
+    }
+
+    private void suggestCorrectionsHelper(String target, int maxDistance, LexiconNode current,
+					  String word, Set<String> set){
+	if(target.isEmpty() && current.isWord && maxDistance>=0){
+	    set.add(word);
+	}
+	Iterator iter = current.iterator();
+	while(iter.hasNext() && !target.isEmpty()){
+	    LexiconNode next = (LexiconNode)iter.next();
+
+	    if(next.letter()==target.charAt(0)){
+		suggestCorrectionsHelper(target.substring(1), maxDistance,
+					 next, word+target.charAt(0), set);
+	    }
+	    else{
+		suggestCorrectionsHelper(target.substring(1), maxDistance-1,
+					 next, word+next.letter(), set);
+	    }
+	}
     }
 
     public Set<String> matchRegex(String pattern){
-	return null;
+
+	Set<String> words = new SetVector<String>();
+	
+	mathRegexHelper(pattern, root, "", words);
+	return words;
     }
-    
+
+    private void matchRegexHelper(String pattern, LexiconNode current,
+				  String word, Set<String> set ){
+
+	if(pattern.startsWith("*")){
+	    if(current.isWord()){
+		set.add(word);
+	    }
+	    Iterator search = current.getChildren().iterator;
+	    while(search.hasNext()){
+		LexiconNode ln = search.next();
+		if(ln.isWord()){
+		    String w = word + ln.letter();
+		    set.add(w);
+		    matchRegexHelper(pattern, ln, w,set);
+		    }
+	    }
+	    set.add(word);
+	}
+
+	Iterator iter = current.iterator();
+	while(iter.hasNext()){
+	    LexiconeNode nextNode = root.getChild(patter.charAt(0)));
+	    
+	matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
+	
+
+    }
+
     public static void main(String args[]){
-	
+
 	LexiconTrie n = new LexiconTrie();
-	
+
 	boolean baseWord = n.addWord(args[0]);
 	boolean checkWordSame = n.addWord(args[1]);
 	boolean checkWordDifferent = n.addWord(args[2]);
 	n.addWord(args[3]);
 	n.addWord(args[4]);
 	n.addWord(args[5]);
-	
+
 	System.out.println("<added> " + args[0] + " to LexiconTrie and got " + baseWord);
-	
+
 	System.out.println("<added> " + args[1]+ " to LexiconTrie and expected false. Actual: " + checkWordSame);
-	
-	System.out.println("<added> " + args[2]+ " to LexiconTrie and expected true. Actual: " + checkWordDifferent);
-	
+
+	System.out.println("<added> " + args[2]+ " to LexiconTrie and expected true. Actual: " + checkWordSame);
+
 	for(int i =0 ; i < root.getChildren().size(); i++){
 	    LexiconNode l = (LexiconNode)root.getChildren().get(i);
 	    System.out.println(i + ": " + l.letter());
-	    
+
 	}
 
 	System.out.println("Number of words: " + n.numWords());
 
-	n.removeWord(args[1]);
 
 	System.out.println("Number of words now: " + n.numWords());
+
+	Iterator<String> lexicon = n.iterator();
+	while(lexicon.hasNext()){
+	    String word = lexicon.next();
+	    System.out.println(word + " length is: " + word.length());
+	}
+
+	Iterator<String> setIter = n.suggestCorrections("cots", 2).iterator();
+	while(setIter.hasNext()){
+	    System.out.println(setIter.next());
+	}
+
+
     }
+
 }

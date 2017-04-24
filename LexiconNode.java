@@ -2,8 +2,9 @@ import structure5.*;
 import java.util.Iterator;
 
 class LexiconNode implements Comparable<LexiconNode> {
+
+    public boolean isWord;
     protected char letter;
-    protected boolean isWord;
     protected Vector<LexiconNode> children;
 
     /* TODO: a data structure for keeping track of the children of
@@ -74,7 +75,7 @@ class LexiconNode implements Comparable<LexiconNode> {
 	    }
 	}
     }
-    
+
     /**
      * TODO: create an Iterator that iterates over children in alphabetical order
      */
