@@ -5,7 +5,7 @@ class LexiconNode implements Comparable<LexiconNode> {
 
     public boolean isWord;
     protected char letter;
-    protected Vector<LexiconNode> children;
+    protected OrderedVector<LexiconNode> children;
 
     /* TODO: a data structure for keeping track of the children of
        this LexiconNode */
@@ -16,7 +16,7 @@ class LexiconNode implements Comparable<LexiconNode> {
     LexiconNode(char letter, boolean isWord) {
         this.letter = letter;
         this.isWord = isWord;
-        children = new Vector<LexiconNode>();
+        children = new OrderedVector<LexiconNode>();
     }
     
     /**
@@ -37,14 +37,7 @@ class LexiconNode implements Comparable<LexiconNode> {
      * TODO: Add LexiconNode child to correct position in child data structure
      */
     public void addChild(LexiconNode ln) {
-	if(children.isEmpty()) children.add(ln);
-	else if(ln.compareTo(children.get(children.size()-1))>0){
-	    children.add(ln);
-	}
-	else{
-	    int loc = binarySearch(ln);
-	    children.add(loc, ln);
-	}
+	children.add(ln);
     }
 
     /**
@@ -52,16 +45,18 @@ class LexiconNode implements Comparable<LexiconNode> {
      */
     public LexiconNode getChild(char ch) {
 	LexiconNode n = null;
-	for(int i = 0; i < children.size(); ++i){
-	    if(children.get(i).letter() == ch){
-		n = children.get(i);
+	Iterator<LexiconNode> iter = children.iterator();
+	while(iter.hasNext()){
+	    LexiconNode next = iter.next();
+	    if(next.letter() == ch){
+		n = next;
 		break;
 	    }
 	}
 	return n;
     }
     
-    public Vector getChildren(){
+    public OrderedVector<LexiconNode> getChildren(){
 	return children;
     }
     
@@ -69,9 +64,11 @@ class LexiconNode implements Comparable<LexiconNode> {
      * Remove LexiconNode child for 'ch' from child data structure
      */
     public void removeChild(char ch) {
-	for(int i = 0; i < children.size(); ++i){
-	    if(children.get(i).letter() == ch){
-		children.remove(i);
+	Iterator<LexiconNode> iter = children.iterator();
+	while(iter.hasNext()){
+	    LexiconNode next = iter.next();
+	    if(next.letter() == ch){
+		children.remove(next);
 	    }
 	}
     }
@@ -83,8 +80,7 @@ class LexiconNode implements Comparable<LexiconNode> {
 	return children.iterator();
     }
     
-    protected 
-    private int binarySearch(LexiconNode ln){
+    /* private int binarySearch(LexiconNode ln){
 	return binaryHelper(children, ln, 0, (children.size()-1)/2,children.size()-1);
     }
     private int binaryHelper(Vector n, LexiconNode ln, int l, int m, int h){
@@ -99,5 +95,5 @@ class LexiconNode implements Comparable<LexiconNode> {
 	    return binaryHelper(n,ln,m+1,(h+m)/2, h);
 	}
 	return m;
-  }
+	}*/
 }

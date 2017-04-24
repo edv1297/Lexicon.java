@@ -3,6 +3,7 @@
 import structure5.*;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.io.FileInputStream;
 
 public class LexiconTrie implements Lexicon {
 
@@ -49,10 +50,11 @@ public class LexiconTrie implements Lexicon {
     //pre: valid filename
     //post: scan each line and add the word contained
     public int addWordsFromFile(String filename) {
-	Scanner scan = new Scanner(filename);
-	while(scan.hasNextLine()){
-	    addWord(scan.nextLine());
-		}
+	FileStream stream = new FileStream(filename);
+        Scanner scan = new Scanner(stream);
+        while(scan.hasNextLine()){
+            addWord(scan.nextLine());
+	}
 	return 0;
     }
 
@@ -214,7 +216,6 @@ public class LexiconTrie implements Lexicon {
 			     current.getChild(pattern.charAt(0)), 
 			     word+pattern.charAt(0), set);
 	}
-	return;
     }
     
 
@@ -222,13 +223,16 @@ public class LexiconTrie implements Lexicon {
 
 	LexiconTrie n = new LexiconTrie();
 	
-	for(int j= 0; j<args.length; ++j){
-	    n.addWord(args[j]);
-	}
+	//	for(int j= 0; j<args.length; ++j){
+	//  n.addWord(args[j]);
+	//} 
 
-	for(int i =0 ; i < root.getChildren().size(); i++){
-	    LexiconNode l = (LexiconNode)root.getChildren().get(i);
-	    System.out.println(i + ": " + l.letter());
+	Iterator i1 = root.iterator();
+	int count = 0; 
+	while(i1.hasNext()){
+	    LexiconNode l = (LexiconNode)i1.next();
+	    System.out.println(count + ": " + l.letter());
+	    count++;
 	    
 	}
 
