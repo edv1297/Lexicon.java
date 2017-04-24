@@ -173,8 +173,8 @@ public class LexiconTrie implements Lexicon {
     }
 
     private void matchRegexHelper(String pattern, LexiconNode current,
-				  String word, Set<String> set ){
-
+				  String word, Set<String> set){
+	/*
 	if(pattern.startsWith("*")){
 	    if(current.isWord){
 		set.add(word);
@@ -196,8 +196,48 @@ public class LexiconTrie implements Lexicon {
 	    if(nextNode!=null){
 		matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
 	    }
+	    }*/
+
+
+	// base here
+	if(current.isWord){
+	    set.add(word);
 	}
 
+	if(current==null || pattern.isEmpty()){
+	    System.out.println(word);
+	    return;
+	}
+
+	if(pattern.startsWith("?")){
+            Iterator<LexiconNode> iter = current.iterator();
+	    char letterAfterCard = pattern.charAt(1);
+	    while(iter.hasNext()){
+		LexiconNode next = iter.next();
+		matchRegexHelper(pattern.substring(1), next, word+next.letter(),set);
+		matchRegexHelper(pattern.substring(1), 
+				 current.getChild(pattern.charAt(1)), 
+				 word+pattern.charAt(1),set);
+	    }
+
+        }
+	else if(pattern.startsWith("*")){
+	    Iterator<LexiconNode> iter = current.iterator();
+	    while(iter.hasNext()){
+		LexiconNode next = iter.next();
+		matchRegexHelper(pattern, next, word+next.letter(),set);
+		if(pattern.length()>1){
+		matchRegexHelper(pattern.substring(1),
+                                 current.getChild(pattern.charAt(1)),
+                                 word+pattern.charAt(1),set);
+		}
+	    }
+	}
+	// if the pattern doesnt start with a wildcard, just traverse the tree normally
+	else{
+	    matchRegexHelper(pattern.substring(1), current.getChild(pattern.charAt(0)),
+			     word+pattern.charAt(0), set);
+	}
     }
 
     public static void main(String args[]){
@@ -222,11 +262,10 @@ public class LexiconTrie implements Lexicon {
 	    String word = lexicon.next();
 	    System.out.println(word + " length is: " + word.length());
 	}
-	Set<String> s = n.matchRegex("a*");
-	Iterator <String> iter = s.iterator();
+ 
+	Iterator<String> iter = n.matchRegex("a*").iterator();
 	
 	while(iter.hasNext()){
-	    System.out.println("flag");
 	    System.out.println(iter.next());
 	}
 	
