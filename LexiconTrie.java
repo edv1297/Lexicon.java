@@ -174,17 +174,20 @@ public class LexiconTrie implements Lexicon {
 
     private void matchRegexHelper(String pattern, LexiconNode current,
 				  String word, Set<String> set ){
-
+	System.out.println(pattern);
 	if(pattern.startsWith("*")){
+	    System.out.println("has asterik");
 	    if(current.isWord){
 		set.add(word);
 	    }
 	    Iterator<LexiconNode> search = current.getChildren().iterator();
 	    while(search.hasNext()){
 		LexiconNode ln = (LexiconNode)search.next();
+		word += ln.letter();
+		System.out.println(word);
 		if(ln.isWord){
-		    String w = word + ln.letter();
-		    set.add(w);
+	      
+		    set.add(word);
 		}
 		matchRegexHelper(pattern, ln, word ,set);
 	    }
@@ -192,13 +195,14 @@ public class LexiconTrie implements Lexicon {
 
 	Iterator<LexiconNode> iter = current.iterator();
 	while(iter.hasNext()){
+	    
 	    LexiconNode nextNode = iter.next().getChild(pattern.charAt(0));
 	    if(nextNode!=null){
 		matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
 	    }
 	}
-
     }
+
 
     public static void main(String args[]){
 
