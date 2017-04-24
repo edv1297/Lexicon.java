@@ -168,7 +168,7 @@ public class LexiconTrie implements Lexicon {
 
 	Set<String> words = new SetVector<String>();
 	
-	mathRegexHelper(pattern, root, "", words);
+	matchRegexHelper(pattern, root, "", words);
 	return words;
     }
 
@@ -176,70 +176,60 @@ public class LexiconTrie implements Lexicon {
 				  String word, Set<String> set ){
 
 	if(pattern.startsWith("*")){
-	    if(current.isWord()){
+	    if(current.isWord){
 		set.add(word);
 	    }
-	    Iterator search = current.getChildren().iterator;
+	    Iterator<LexiconNode> search = current.getChildren().iterator();
 	    while(search.hasNext()){
-		LexiconNode ln = search.next();
-		if(ln.isWord()){
+		LexiconNode ln = (LexiconNode)search.next();
+		if(ln.isWord){
 		    String w = word + ln.letter();
 		    set.add(w);
-		    matchRegexHelper(pattern, ln, w,set);
-		    }
+		}
+		matchRegexHelper(pattern, ln, word ,set);
 	    }
-	    set.add(word);
 	}
 
-	Iterator iter = current.iterator();
+	Iterator<LexiconNode> iter = current.iterator();
 	while(iter.hasNext()){
-	    LexiconeNode nextNode = root.getChild(patter.charAt(0)));
-	    
-	matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
-	
+	    LexiconNode nextNode = iter.next().getChild(pattern.charAt(0));
+	    if(nextNode!=null){
+		matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
+	    }
+	}
 
     }
 
     public static void main(String args[]){
 
 	LexiconTrie n = new LexiconTrie();
-
-	boolean baseWord = n.addWord(args[0]);
-	boolean checkWordSame = n.addWord(args[1]);
-	boolean checkWordDifferent = n.addWord(args[2]);
-	n.addWord(args[3]);
-	n.addWord(args[4]);
-	n.addWord(args[5]);
-
-	System.out.println("<added> " + args[0] + " to LexiconTrie and got " + baseWord);
-
-	System.out.println("<added> " + args[1]+ " to LexiconTrie and expected false. Actual: " + checkWordSame);
-
-	System.out.println("<added> " + args[2]+ " to LexiconTrie and expected true. Actual: " + checkWordSame);
+	
+	for(int j= 0; j<args.length; ++j){
+	    n.addWord(args[j]);
+	}
 
 	for(int i =0 ; i < root.getChildren().size(); i++){
 	    LexiconNode l = (LexiconNode)root.getChildren().get(i);
 	    System.out.println(i + ": " + l.letter());
-
+	    
 	}
 
 	System.out.println("Number of words: " + n.numWords());
 
-
-	System.out.println("Number of words now: " + n.numWords());
-
 	Iterator<String> lexicon = n.iterator();
+
 	while(lexicon.hasNext()){
 	    String word = lexicon.next();
 	    System.out.println(word + " length is: " + word.length());
 	}
-
-	Iterator<String> setIter = n.suggestCorrections("cots", 2).iterator();
-	while(setIter.hasNext()){
-	    System.out.println(setIter.next());
+	Set<String> s = n.matchRegex("a*");
+	Iterator <String> iter = s.iterator();
+	
+	while(iter.hasNext()){
+	    System.out.println("flag");
+	    System.out.println(iter.next());
 	}
-
-
+	
     }
-
+    
 }
