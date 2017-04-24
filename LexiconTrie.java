@@ -166,6 +166,7 @@ public class LexiconTrie implements Lexicon {
 	}
     }
 
+    // post: return a set of all the possible regex matches
     public Set<String> matchRegex(String pattern){
 
 	Set<String> words = new SetVector<String>();
@@ -176,32 +177,6 @@ public class LexiconTrie implements Lexicon {
 
     private void matchRegexHelper(String pattern, LexiconNode current,
 				  String word, Set<String> set){
-	/*
-	if(pattern.startsWith("*")){
-	    if(current.isWord){
-		set.add(word);
-	    }
-	    Iterator<LexiconNode> search = current.getChildren().iterator();
-	    while(search.hasNext()){
-		LexiconNode ln = (LexiconNode)search.next();
-		if(ln.isWord){
-		    String w = word + ln.letter();
-		    set.add(w);
-		}
-		matchRegexHelper(pattern, ln, word ,set);
-	    }
-	}
-
-	Iterator<LexiconNode> iter = current.iterator();
-	while(iter.hasNext()){
-	    LexiconNode nextNode = iter.next().getChild(pattern.charAt(0));
-	    if(nextNode!=null){
-		matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
-	    }
-	    }*/
-
-
-	// base here
 
 	if(pattern.isEmpty()){
 	    return;
@@ -210,20 +185,34 @@ public class LexiconTrie implements Lexicon {
 	if(current.isWord) set.add(word);
 
 	Iterator<LexiconNode> iter = current.iterator();
-	while(iter.hasNext() && !pattern.isEmpty()){
+	while(iter.hasNext()){
 	    LexiconNode next = iter.next();
 	    if(pattern.startsWith("?")){
 		matchRegexHelper(pattern.substring(1), next, word+next.letter(),set);
 	    }
 	    
 	    else if(pattern.startsWith("*")){	
-		matchRegexHelper(next.letter()+pattern.substring(1),next, word+next.letter(), set);
+		// if the only a * is left, get every word in that isolated tree
+		if(pattern.length()==1){
+		    matchRegexHelper(next.letter()+pattern, current, word, set);
+		}
+		else{
+		    // get everything up until the next character
+		    if(pattern.charAt(1)!=next.letter()){
+			matchRegexHelper(next.letter()+pattern,current,word,set);
+		    }
+		    // when the next letter of the pattern  is already found 
+		    if(pattern.charAt(1)==next.letter()){
+			matchRegexHelper(pattern.substring(1), current, word,set);
+		    }
+		}
 	    }
-	    // if the pattern doesnt start with a wildcard, just traverse the tree normally
-	    else if(current.getChild(pattern.charAt(0))!= null && pattern.length()>0){
-		matchRegexHelper(pattern.substring(1), current.getChild(pattern.charAt(0)),
-				 word+pattern.charAt(0), set);
-	    }
+	}
+	    // if the pattern doesnt start with a wildcard, just traverse normally
+	if(current.getChild(pattern.charAt(0))!=null){
+	    matchRegexHelper(pattern.substring(1), 
+			     current.getChild(pattern.charAt(0)), 
+			     word+pattern.charAt(0), set);
 	}
 	return;
     }
@@ -252,7 +241,7 @@ public class LexiconTrie implements Lexicon {
 	    System.out.println(word + " length is: " + word.length());
 	}
  
-	Iterator<String> iter = n.matchRegex("a*").iterator();
+	Iterator<String> iter = n.matchRegex("*a*").iterator();
 	
 	while(iter.hasNext()){
 	    System.out.println(iter.next());

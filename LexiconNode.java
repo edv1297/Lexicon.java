@@ -83,28 +83,11 @@ class LexiconNode implements Comparable<LexiconNode> {
 	return children.iterator();
     }
     
+    protected 
     private int binarySearch(LexiconNode ln){
 	return binaryHelper(children, ln, 0, (children.size()-1)/2,children.size()-1);
     }
     private int binaryHelper(Vector n, LexiconNode ln, int l, int m, int h){
-	//     if(h-l <=1){
-	//       if(ln.compareTo(LexiconNode)n.get(h)>0){
-	//     return h+1;
-	//   }else{
-	//     return m;
-	//   }
-	// }
-	//  if(l==m && m == h){
-	//    if(ln.compareTo((LexiconNode)n.get(m))<0) return l;
-	//      if(ln.compareTo((LexiconNode)n.get(m))<0) return h;
-	//    }
-	/*if(ln.compareTo((LexiconNode)n.get(m)) <0){
-	  binaryHelper(n, ln, l, (l+m)/2,m-1);
-	  }else if(ln.compareTo((LexiconNode)n.get(m))>0){
-	  binaryHelper(n,ln,m,(h+m)/2, h);
-	  }
-	  return h;*/
-	
 	
 	if(l==h) return h;
 	// if the node to be added is in the first half of the children (ln)

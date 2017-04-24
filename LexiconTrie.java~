@@ -1,3 +1,5 @@
+// Dysron Marshall and Eddy Varela
+// CS 136 10am
 import structure5.*;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -173,26 +175,18 @@ public class LexiconTrie implements Lexicon {
     }
 
     private void matchRegexHelper(String pattern, LexiconNode current,
-<<<<<<< HEAD
 				  String word, Set<String> set){
 	/*
-=======
-				  String word, Set<String> set ){
-	System.out.println(pattern);
->>>>>>> 7335a39749e4ea672a1b85af9c85191a19aebc3e
 	if(pattern.startsWith("*")){
-	    System.out.println("has asterik");
 	    if(current.isWord){
 		set.add(word);
 	    }
 	    Iterator<LexiconNode> search = current.getChildren().iterator();
 	    while(search.hasNext()){
 		LexiconNode ln = (LexiconNode)search.next();
-		word += ln.letter();
-		System.out.println(word);
 		if(ln.isWord){
-	      
-		    set.add(word);
+		    String w = word + ln.letter();
+		    set.add(w);
 		}
 		matchRegexHelper(pattern, ln, word ,set);
 	    }
@@ -200,61 +194,40 @@ public class LexiconTrie implements Lexicon {
 
 	Iterator<LexiconNode> iter = current.iterator();
 	while(iter.hasNext()){
-	    System.out.println("iter does have next");
-
 	    LexiconNode nextNode = iter.next().getChild(pattern.charAt(0));
-	    
 	    if(nextNode!=null){
-		System.out.println("nextNode is not null");
 		matchRegexHelper(pattern.substring(1), nextNode, word+current.letter(), set);
 	    }
 	    }*/
 
 
 	// base here
-	if(current.isWord){
-	    set.add(word);
-	}
 
-	if(current==null || pattern.isEmpty()){
-	    System.out.println(word);
+	if(pattern.isEmpty()){
 	    return;
 	}
-<<<<<<< HEAD
 
-	if(pattern.startsWith("?")){
-            Iterator<LexiconNode> iter = current.iterator();
-	    char letterAfterCard = pattern.charAt(1);
-	    while(iter.hasNext()){
-		LexiconNode next = iter.next();
+	if(current.isWord) set.add(word);
+
+	Iterator<LexiconNode> iter = current.iterator();
+	while(iter.hasNext() && !pattern.isEmpty()){
+	    LexiconNode next = iter.next();
+	    if(pattern.startsWith("?")){
 		matchRegexHelper(pattern.substring(1), next, word+next.letter(),set);
-		matchRegexHelper(pattern.substring(1), 
-				 current.getChild(pattern.charAt(1)), 
-				 word+pattern.charAt(1),set);
 	    }
-
-        }
-	else if(pattern.startsWith("*")){
-	    Iterator<LexiconNode> iter = current.iterator();
-	    while(iter.hasNext()){
-		LexiconNode next = iter.next();
-		matchRegexHelper(pattern, next, word+next.letter(),set);
-		if(pattern.length()>1){
-		matchRegexHelper(pattern.substring(1),
-                                 current.getChild(pattern.charAt(1)),
-                                 word+pattern.charAt(1),set);
-		}
+	    
+	    else if(pattern.startsWith("*")){	
+		matchRegexHelper(next.letter()+pattern.substring(1),next, word+next.letter(), set);
+	    }
+	    // if the pattern doesnt start with a wildcard, just traverse the tree normally
+	    else if(current.getChild(pattern.charAt(0))!= null && pattern.length()>0){
+		matchRegexHelper(pattern.substring(1), current.getChild(pattern.charAt(0)),
+				 word+pattern.charAt(0), set);
 	    }
 	}
-	// if the pattern doesnt start with a wildcard, just traverse the tree normally
-	else{
-	    matchRegexHelper(pattern.substring(1), current.getChild(pattern.charAt(0)),
-			     word+pattern.charAt(0), set);
-	}
-=======
->>>>>>> 7335a39749e4ea672a1b85af9c85191a19aebc3e
+	return;
     }
-
+    
 
     public static void main(String args[]){
 
